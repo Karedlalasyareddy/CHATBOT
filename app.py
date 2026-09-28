@@ -1,13 +1,16 @@
-
-
 import streamlit as st
-import ollama
-client = Groq(api_key=st.secrets["GROQ_API_KEY"])
-# Page configuration
+from groq import Groq
+
+# ---------------- PAGE CONFIGURATION ----------------
 st.set_page_config(
     page_title="ZenChat AI",
     page_icon="🤖",
     layout="wide"
+)
+
+# ---------------- GROQ CLIENT ----------------
+client = Groq(
+    api_key=st.secrets["GROQ_API_KEY"]
 )
 
 # ---------------- CUSTOM CSS ----------------
@@ -127,7 +130,7 @@ with st.sidebar:
 
     st.divider()
 
-    st.caption("Powered by Ollama • Llama 3.2")
+    st.caption("Powered by Groq • Llama 3.3")
 
 
 # ---------------- CHAT HISTORY ----------------
@@ -197,7 +200,6 @@ if prompt:
     with st.chat_message("user"):
         st.markdown(prompt)
 
-
     # ---------------- AI RESPONSE ----------------
     with st.chat_message("assistant"):
 
@@ -207,20 +209,21 @@ if prompt:
 
             with st.spinner("Thinking..."):
 
-                response = ollama.chat(
-                    model="llama3.2",
+                response = client.chat.completions.create(
+                    model="llama-3.3-70b-versatile",
                     messages=[
                         {
                             "role": "system",
-                            "content":
-                            "You are ZenChat, a friendly and helpful "
-                            "AI assistant. Give clear and simple answers."
+                            "content": (
+                                "You are ZenChat, a friendly and helpful "
+                                "AI assistant. Give clear and simple answers."
+                            )
                         },
                         *st.session_state.messages
                     ]
                 )
 
-            answer = response["message"]["content"]
+            answer = response.choices[0].message.content
 
             response_placeholder.markdown(answer)
 
@@ -235,10 +238,8 @@ if prompt:
         except Exception as e:
 
             response_placeholder.error(
-                "Could not connect to Ollama. "
-                "Make sure Ollama is running and "
-                "the llama3.2 model is installed."
+                "Unable to connect to Groq. "
+                "Please check your API key and Streamlit Secrets."
             )
 
             st.caption(str(e))
-
