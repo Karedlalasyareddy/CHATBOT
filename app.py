@@ -2,7 +2,7 @@
 
 import streamlit as st
 import ollama
-
+client = Groq(api_key=st.secrets["GROQ_API_KEY"])
 # Page configuration
 st.set_page_config(
     page_title="ZenChat AI",
